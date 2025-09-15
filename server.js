@@ -3,23 +3,24 @@ import bodyParser from "body-parser";
 import methodOverride from "method-override";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// middleware
+// Middleware
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+app.use(express.static("public")); // serve CSS and static files
 
-// in-memory posts storage
+// In-memory posts storage
 let posts = [];
 let idCounter = 1;
 
-// home route - list + create form
+// Home route - list + create form
 app.get("/", (req, res) => {
   res.render("index", { posts });
 });
 
-// create post
+// Create post
 app.post("/posts", (req, res) => {
   const { title, content, author } = req.body;
   posts.push({
@@ -32,14 +33,14 @@ app.post("/posts", (req, res) => {
   res.redirect("/");
 });
 
-// edit form
+// Edit form
 app.get("/posts/:id/edit", (req, res) => {
   const post = posts.find(p => p.id == req.params.id);
   if (!post) return res.send("Post not found");
   res.render("index", { posts, editPost: post });
 });
 
-// update post
+// Update post
 app.put("/posts/:id", (req, res) => {
   const post = posts.find(p => p.id == req.params.id);
   if (post) {
@@ -50,10 +51,13 @@ app.put("/posts/:id", (req, res) => {
   res.redirect("/");
 });
 
-// delete post
+// Delete post
 app.delete("/posts/:id", (req, res) => {
   posts = posts.filter(p => p.id != req.params.id);
   res.redirect("/");
 });
 
+// Start server
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+
+
